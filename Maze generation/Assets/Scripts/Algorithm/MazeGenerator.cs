@@ -1,38 +1,52 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class MazeGenerator : MonoBehaviour
 {
-    [SerializeField]
-    private Cell _mazeCellPrefab;
+    [SerializeField] private Cell _mazeCellPrefab;
 
-    [SerializeField]
-    private int _mazeWidth;
+    public int mazeWidth;
 
-    [SerializeField]
-    private int _mazeDepth;
+    public int mazeDepth;
 
-    private Cell[,] _mazeGrid;
+    public Cell[,] mazeGrid;
 
-    void Start()
+    private GameObject _container;
+
+    public void InitializeGrid()
     {
-        _mazeGrid = new Cell[_mazeWidth, _mazeDepth];
+        DestroyGrid();
+        
+        mazeGrid = new Cell[mazeWidth, mazeDepth];
 
-        for (int x = 0; x < _mazeWidth; x++)
+        _container = new GameObject("MazeContainer");
+        
+        for (int x = 0; x < mazeWidth; x++)
         {
-            for (int z = 0; z < _mazeDepth; z++)
+            for (int z = 0; z < mazeDepth; z++)
             {
-                _mazeGrid[x, z] = Instantiate(_mazeCellPrefab, new Vector3(x, 0, z), Quaternion.identity);
+                mazeGrid[x, z] = Instantiate(_mazeCellPrefab, new Vector3(x, 0, z), Quaternion.identity);
+                mazeGrid[x, z].transform.parent = _container.transform;
             }
         }
-
-        GenerateMaze(null, _mazeGrid[0, 0]);
+        
     }
 
-    private void GenerateMaze(Cell previousCell, Cell currentCell)
+    private void DestroyGrid()
     {
+        if (_container == null)
+            return;
+        Destroy(_container);
+    }
+
+    public void GenerateMaze(Cell previousCell, Cell currentCell)
+    {
+        
+        
         currentCell.Visit();
         ClearWalls(previousCell, currentCell);
 
@@ -61,9 +75,9 @@ public class MazeGenerator : MonoBehaviour
         int x = (int)currentCell.transform.position.x;
         int z = (int)currentCell.transform.position.z;
 
-        if (x + 1 < _mazeWidth)
+        if (x + 1 < mazeWidth)
         {
-            var cellToRight = _mazeGrid[x + 1, z];
+            var cellToRight = mazeGrid[x + 1, z];
             
             if (cellToRight.IsVisited == false)
             {
@@ -73,7 +87,7 @@ public class MazeGenerator : MonoBehaviour
 
         if (x - 1 >= 0)
         {
-            var cellToLeft = _mazeGrid[x - 1, z];
+            var cellToLeft = mazeGrid[x - 1, z];
 
             if (cellToLeft.IsVisited == false)
             {
@@ -81,9 +95,9 @@ public class MazeGenerator : MonoBehaviour
             }
         }
 
-        if (z + 1 < _mazeDepth)
+        if (z + 1 < mazeDepth)
         {
-            var cellToFront = _mazeGrid[x, z + 1];
+            var cellToFront = mazeGrid[x, z + 1];
 
             if (cellToFront.IsVisited == false)
             {
@@ -93,7 +107,7 @@ public class MazeGenerator : MonoBehaviour
 
         if (z - 1 >= 0)
         {
-            var cellToBack = _mazeGrid[x, z - 1];
+            var cellToBack = mazeGrid[x, z - 1];
 
             if (cellToBack.IsVisited == false)
             {
@@ -104,38 +118,14 @@ public class MazeGenerator : MonoBehaviour
 
     private void ClearWalls(Cell previousCell, Cell currentCell)
     {
-        if (previousCell == null)
-        {
-            return;
-        }
 
-        if (previousCell.transform.position.x < currentCell.transform.position.x)
-        {
-            previousCell.ClearRightWall();
-            currentCell.ClearLeftWall();
-            return;
-        }
-
-        if (previousCell.transform.position.x > currentCell.transform.position.x)
-        {
-            previousCell.ClearLeftWall();
-            currentCell.ClearRightWall();
-            return;
-        }
-
-        if (previousCell.transform.position.z < currentCell.transform.position.z)
-        {
-            previousCell.ClearFrontWall();
-            currentCell.ClearBackWall();
-            return;
-        }
-
-        if (previousCell.transform.position.z > currentCell.transform.position.z)
-        {
-            previousCell.ClearBackWall();
-            currentCell.ClearFrontWall();
-            return;
-        }
+        if (previousCell == null)return;
+        
+        var direction = currentCell.transform.position - previousCell.transform.position;
+        
+        previousCell.ClearWall(direction);
+        currentCell.ClearWall(-direction);
+        
     }
 
 }
