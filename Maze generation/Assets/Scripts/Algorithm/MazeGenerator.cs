@@ -11,7 +11,7 @@ public class MazeGenerator : MonoBehaviour
 
     public int mazeWidth;
 
-    public int mazeDepth;
+    public int mazeDepth; 
 
     public Cell[,] mazeGrid;
 
@@ -42,8 +42,36 @@ public class MazeGenerator : MonoBehaviour
             return;
         Destroy(_container);
     }
+    
+    public IEnumerator GenerateMazeCoroutine(Cell startCell)
+    {
+        Stack<Cell> cellStack = new Stack<Cell>();
+        cellStack.Push(startCell);
+        startCell.Visit();
 
-    public void GenerateMaze(Cell previousCell, Cell currentCell)
+        while (cellStack.Count > 0)
+        {
+            var currentCell = cellStack.Peek();
+            var nextCell = GetNextUnvisitedCell(currentCell);
+
+            if (nextCell != null)
+            {
+                ClearWalls(currentCell, nextCell);
+                nextCell.Visit();
+                cellStack.Push(nextCell);
+            }
+            else
+            {
+                cellStack.Pop();
+            }
+
+            // Pauzeer na een bepaald aantal stappen
+            if (cellStack.Count % 1000 == 0)
+                yield return null;
+        }
+    }
+
+    /*public void GenerateMaze(Cell previousCell, Cell currentCell)
     {
         
         
@@ -61,14 +89,18 @@ public class MazeGenerator : MonoBehaviour
                 GenerateMaze(currentCell, nextCell);
             }
         } while (nextCell != null);
-    }
+    }*/
 
     private Cell GetNextUnvisitedCell(Cell currentCell)
     {
-        var unvisitedCells = GetUnvisitedCells(currentCell);
+        var unvisitedCells = GetUnvisitedCells(currentCell).ToList();
 
-        return unvisitedCells.OrderBy(_ => Random.Range(1, 10)).FirstOrDefault();
+        if (unvisitedCells.Count == 0) return null;
+
+        int randomIndex = Random.Range(0, unvisitedCells.Count);
+        return unvisitedCells[randomIndex];
     }
+
 
     private IEnumerable<Cell> GetUnvisitedCells(Cell currentCell)
     {

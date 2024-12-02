@@ -11,7 +11,7 @@ public class GenerateButton : MonoBehaviour
     public void RegenerateMaze()
     {
         _mazeGenerator.InitializeGrid();
-        _mazeGenerator.GenerateMaze(null, _mazeGenerator.mazeGrid[0,0]);
-        
+        //_mazeGenerator.GenerateMaze(null, _mazeGenerator.mazeGrid[0,0]);
+        StartCoroutine(_mazeGenerator.GenerateMazeCoroutine(_mazeGenerator.mazeGrid[0, 0]));
     }
 }
