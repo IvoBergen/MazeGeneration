@@ -1,54 +1,59 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Cell : MonoBehaviour
 {
     [SerializeField] private GameObject _leftWall;
-
     [SerializeField] private GameObject _rightWall;
-
     [SerializeField] private GameObject _frontWall;
-
     [SerializeField] private GameObject _backWall;
-
     [SerializeField] private GameObject _unvisitedBlock;
 
     public bool IsVisited { get; private set; }
-    
 
+    private Dictionary<Vector3, GameObject> _walls;
+
+    //Sets the dictionary
+    private void Awake()
+    {
+        _walls = new Dictionary<Vector3, GameObject>
+        {
+            { Vector3.left, _leftWall },
+            { Vector3.right, _rightWall },
+            { Vector3.forward, _frontWall },
+            { Vector3.back, _backWall }
+        };
+    }
+
+    //Makes sure that the code knows this is a visited cell
+    private void SetVisited(bool visited)
+    {
+        IsVisited = visited;
+        _unvisitedBlock.SetActive(!visited);
+    }
+
+    //Separate function to set the state for visited cells during the coroutine 
     public void Visit()
     {
-        IsVisited = true;
-        _unvisitedBlock.SetActive(false);
+        SetVisited(true);
     }
 
     public void ClearWall(Vector3 direction)
     {
-        if(direction.x > 0)ClearRightWall();
-        else if(direction.x < 0)ClearLeftWall();
-        else if(direction.z > 0)ClearFrontWall();
-        else if(direction.z < 0)ClearBackWall();
+        direction = direction.normalized; // Ensure direction is normalized.
+        if (_walls.TryGetValue(direction, out var wall))
+        {
+            wall.SetActive(false);
+        }
     }
 
-    public void ClearLeftWall()
+    public void InitializeWalls(GameObject leftWall, GameObject rightWall, GameObject frontWall, GameObject backWall)
     {
-        _leftWall.SetActive(false);
-    }
+        _leftWall = leftWall;
+        _rightWall = rightWall;
+        _frontWall = frontWall;
+        _backWall = backWall;
 
-    public void ClearRightWall()
-    {
-        _rightWall.SetActive(false);
-    }
-
-    public void ClearFrontWall()
-    {
-        _frontWall.SetActive(false);
-    }
-
-    public void ClearBackWall()
-    {
-        _backWall.SetActive(false);
+        Awake(); // Reinitialize the dictionary after setting walls.
     }
 }
-

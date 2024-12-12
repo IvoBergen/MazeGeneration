@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +16,7 @@ public class MazeGenerator : MonoBehaviour
 
     private GameObject _container;
 
+    // creates the grid of the maze and Instantiates the cubes based on the selected scale
     public void InitializeGrid()
     {
         DestroyGrid();
@@ -25,17 +25,21 @@ public class MazeGenerator : MonoBehaviour
 
         _container = new GameObject("MazeContainer");
         
-        for (int x = 0; x < mazeWidth; x++)
+        for (var x = 0; x < mazeWidth; x++)
         {
-            for (int z = 0; z < mazeDepth; z++)
+            for (var z = 0; z < mazeDepth; z++)
             {
                 mazeGrid[x, z] = Instantiate(_mazeCellPrefab, new Vector3(x, 0, z), Quaternion.identity);
                 mazeGrid[x, z].transform.parent = _container.transform;
             }
         }
         
+        ClearWallsAtPosition(mazeGrid[mazeWidth - 1, mazeDepth - 1], Vector3.right);
+        ClearWallsAtPosition(mazeGrid[0, 0], Vector3.left);
+
     }
 
+    //destroys the container and grid when the maze is regenerated
     private void DestroyGrid()
     {
         if (_container == null)
@@ -43,6 +47,7 @@ public class MazeGenerator : MonoBehaviour
         Destroy(_container);
     }
     
+    // A IEnumerator that generates destroys the walls between cubes to generate a maze
     public IEnumerator GenerateMazeCoroutine(Cell startCell)
     {
         Stack<Cell> cellStack = new Stack<Cell>();
@@ -64,48 +69,29 @@ public class MazeGenerator : MonoBehaviour
             {
                 cellStack.Pop();
             }
-
-            // Pauzeer na een bepaald aantal stappen
+            
             if (cellStack.Count % 1000 == 0)
                 yield return null;
         }
     }
 
-    /*public void GenerateMaze(Cell previousCell, Cell currentCell)
-    {
-        
-        
-        currentCell.Visit();
-        ClearWalls(previousCell, currentCell);
-
-        Cell nextCell;
-
-        do
-        {
-            nextCell = GetNextUnvisitedCell(currentCell);
-
-            if (nextCell != null)
-            {
-                GenerateMaze(currentCell, nextCell);
-            }
-        } while (nextCell != null);
-    }*/
-
+    //give the algorithm the next cell to visit based on the position of the current cell
     private Cell GetNextUnvisitedCell(Cell currentCell)
     {
         var unvisitedCells = GetUnvisitedCells(currentCell).ToList();
 
         if (unvisitedCells.Count == 0) return null;
 
-        int randomIndex = Random.Range(0, unvisitedCells.Count);
+        var randomIndex = Random.Range(0, unvisitedCells.Count);
         return unvisitedCells[randomIndex];
     }
 
-
+    //calculates what cell is and isn't visited around the currentcell
     private IEnumerable<Cell> GetUnvisitedCells(Cell currentCell)
     {
-        int x = (int)currentCell.transform.position.x;
-        int z = (int)currentCell.transform.position.z;
+        var position = currentCell.transform.position;
+        var x = (int)position.x;
+        var z = (int)position.z;
 
         if (x + 1 < mazeWidth)
         {
@@ -148,7 +134,8 @@ public class MazeGenerator : MonoBehaviour
         }
     }
 
-    private void ClearWalls(Cell previousCell, Cell currentCell)
+    //destroys the walls based on the movement of the algorithm
+    private static void ClearWalls(Cell previousCell, Cell currentCell)
     {
 
         if (previousCell == null)return;
@@ -159,6 +146,12 @@ public class MazeGenerator : MonoBehaviour
         currentCell.ClearWall(-direction);
         
     }
+    
+    //clears a specific wall with the help of the position and the movement direction
+    private static void ClearWallsAtPosition(Cell cell, Vector3 direction)
+    {
+        cell.ClearWall(direction);
+    }
+    
 
 }
-
