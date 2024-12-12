@@ -2,8 +2,13 @@ using UnityEngine;
 
 public class CameraScaling : MonoBehaviour
 {
-
-    //Scales the camera based on the width, height and cell size and calculates that
+    /// <summary>
+    /// Zooms the camera out based on the width, depth and cell size and that calculated 
+    /// </summary>
+    /// <param name="camera">The camera object</param>
+    /// <param name="mapWidth">The width of the map</param>
+    /// <param name="mapDepth">The depth of the map</param>
+    /// <param name="cellSize">The size of the cell</param>
     public void AdjustCamera(Camera camera, int mapWidth, int mapDepth, float cellSize)
     {
         var mapWidthInUnits = mapWidth * cellSize;

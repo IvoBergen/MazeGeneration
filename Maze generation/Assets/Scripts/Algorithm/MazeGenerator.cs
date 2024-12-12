@@ -6,17 +6,18 @@ using Random = UnityEngine.Random;
 
 public class MazeGenerator : MonoBehaviour
 {
+    [Header("Class specific Scripts")]
     [SerializeField] private Cell _mazeCellPrefab;
-
-    public int mazeWidth;
-
-    public int mazeDepth; 
-
     public Cell[,] mazeGrid;
 
+    [Header("Properties")]
+    public int mazeWidth;
+    public int mazeDepth; 
     private GameObject _container;
-
-    // creates the grid of the maze and Instantiates the cubes based on the selected scale
+    
+    /// <summary>
+    /// creates the grid of the maze and Instantiates the cubes based on the selected scale
+    /// </summary>
     public void InitializeGrid()
     {
         DestroyGrid();
@@ -39,7 +40,10 @@ public class MazeGenerator : MonoBehaviour
 
     }
 
-    //destroys the container and grid when the maze is regenerated
+    
+    /// <summary>
+    /// destroys the container and grid when the maze is regenerated
+    /// </summary>
     private void DestroyGrid()
     {
         if (_container == null)
@@ -47,10 +51,15 @@ public class MazeGenerator : MonoBehaviour
         Destroy(_container);
     }
     
-    // A IEnumerator that generates destroys the walls between cubes to generate a maze
+    
+    /// <summary>
+    /// A IEnumerator that generates destroys the walls between cubes to generate a maze
+    /// </summary>
+    /// <param name="startCell"> the starting cell</param>
+    /// <returns>A generated maze</returns>
     public IEnumerator GenerateMazeCoroutine(Cell startCell)
     {
-        Stack<Cell> cellStack = new Stack<Cell>();
+        var cellStack = new Stack<Cell>();
         cellStack.Push(startCell);
         startCell.Visit();
 
@@ -75,7 +84,11 @@ public class MazeGenerator : MonoBehaviour
         }
     }
 
-    //give the algorithm the next cell to visit based on the position of the current cell
+    /// <summary>
+    /// give the algorithm the next cell to visit based on the position of the current cell
+    /// </summary>
+    /// <param name="currentCell">The current cell the algorithm is on</param>
+    /// <returns>The next unvisited cell</returns>
     private Cell GetNextUnvisitedCell(Cell currentCell)
     {
         var unvisitedCells = GetUnvisitedCells(currentCell).ToList();
@@ -86,7 +99,12 @@ public class MazeGenerator : MonoBehaviour
         return unvisitedCells[randomIndex];
     }
 
-    //calculates what cell is and isn't visited around the currentcell
+    
+    /// <summary>
+    /// calculates what cell is and isn't visited around the currentCell
+    /// </summary>
+    /// <param name="currentCell">The current cell the algorithm is on</param>
+    /// <returns>A new cell for the algorithm to visit</returns>
     private IEnumerable<Cell> GetUnvisitedCells(Cell currentCell)
     {
         var position = currentCell.transform.position;
@@ -133,8 +151,12 @@ public class MazeGenerator : MonoBehaviour
             }
         }
     }
-
-    //destroys the walls based on the movement of the algorithm
+    
+    /// <summary>
+    /// Destroys the walls based on the movement of the algorithm
+    /// </summary>
+    /// <param name="previousCell">The cell the algorithm was on before moving</param>
+    /// <param name="currentCell">The cell the algorithm is on</param>
     private static void ClearWalls(Cell previousCell, Cell currentCell)
     {
 
@@ -147,11 +169,13 @@ public class MazeGenerator : MonoBehaviour
         
     }
     
-    //clears a specific wall with the help of the position and the movement direction
+    /// <summary>
+    /// Clears a specific wall with the help of the position and the movement direction
+    /// </summary>
+    /// <param name="cell">The cell from the wall that needs to be removed</param>
+    /// <param name="direction">The direction to calculate which wall needs to be destroyed</param>
     private static void ClearWallsAtPosition(Cell cell, Vector3 direction)
     {
         cell.ClearWall(direction);
     }
-    
-
 }

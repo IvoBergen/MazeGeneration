@@ -3,9 +3,12 @@ using UnityEngine.UI;
 
 public class GenerateButton : MonoBehaviour
 {
+    [Header("Script Specific file")]
     [SerializeField] private MazeGenerator _mazeGenerator;
-
-    //(Re)Generates the maze and starts the coroutine 
+    
+    /// <summary>
+    /// (Re)Generates the maze and starts the coroutine 
+    /// </summary>
     public void RegenerateMaze()
     {
         _mazeGenerator.InitializeGrid();
